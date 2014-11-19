@@ -6,6 +6,7 @@
 package main.neural.network;
 
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Random;
 
 /**
@@ -14,80 +15,46 @@ import java.util.Random;
  */
 public class CoucheNeuronne {
     
-    Neuronne[] neuronnes;
+    float[] poidsEntrees;
+    float[] sorties;
+    private int nbEntrees;
     
-    public CoucheNeuronne(int nbNeuronnes, Neuronne[] entrees, Random r){
-        this.neuronnes = new Neuronne[nbNeuronnes];
-        for(Neuronne n : neuronnes){
-            n = new Neuronne();
-            for(Neuronne entree : entrees){
-                n.ajouterEntree(entree, r.nextFloat());
-            }           
+    
+    public CoucheNeuronne(int nbEntrees, int nbNeuronnes, Random r){
+        this.nbEntrees = nbEntrees;
+        this.sorties = new float[nbNeuronnes];
+        this.poidsEntrees = new float[nbEntrees * nbNeuronnes];
+        for(int i = 0; i < (nbEntrees * nbNeuronnes); i++){
+            this.poidsEntrees[i] = r.nextFloat();
         }
     }
     
-    public void evaluerCouche(){
-        for(Neuronne n : neuronnes){
-            n.evaluerEntree();
+    public void evaluerCouche(CoucheNeuronne couchePrecedente){
+        for(int i = 0; i < sorties.length; i++){
+            sorties [i] = 0;
+            for(int j = 0; j < nbEntrees; j++){
+                System.out.println(sorties.length + " :: " + i + " :: " + j + " :: " + nbEntrees );
+                sorties [i] += couchePrecedente.sorties[j] * poidsEntrees[i * nbEntrees + j];
+                
+                sorties[i] = fonctionEvaluation(sorties[i]);
+            }
         }
+    }
+    
+    public void evaluerCouche(float[] valeursEntrees){
+        for(int i = 0; i < sorties.length; i++){
+            sorties [i] = valeursEntrees[i];
+            sorties[i] = fonctionEvaluation(sorties[i]);
+        }
+    }
+    
+    private float fonctionEvaluation(float f){
+        //linéaire
+        return f;
     }
     
     public float[] getSorties(){
-        float[] valeurRetour = new float[neuronnes.length];
-        for(int i = 0; i < neuronnes.length; ++i){
-            valeurRetour[i] = neuronnes[i].getSortie();
-        }
-        return valeurRetour;
-    }
-    
-    /**
-     *  TEST EN HAUT 
-     *
-     */
-
-    float[] sorties; //représente la valeur qui est donné a chaque sorties représent le nombre de neuronnes.
-    float[] entrees; //représente la valeur de chaque entrées;
-    float[] poids; //représente le poid donné à chaque entrée;
-
-    public CoucheNeuronne(int nbEntrees, int nbSorties, Random r) {
-        sorties = new float[nbSorties];
-        entrees = new float[nbEntrees + 1]; //+1 pour le bias
-        poids = new float[(1 + nbEntrees) * nbSorties];
-        initialiserPoids(r);
-    }
-
-    public void initialiserPoids(Random r) {
-        for (int i = 0; i < poids.length; i++) {
-            poids[i] = (r.nextFloat() - 0.5f) * 4f;
-        }
-    }
-    
-    
-
-    /**
-     * Execute un couche de neuronnes selon l'entree. Les valeurs de retours
-     * sont ensuite passés via une copie du array.
-     *
-     * @param in
-     * @return
-     */
-    public float[] run(float[] in) {
-        System.arraycopy(in, 0, entrees, 0, in.length);
-        entrees[entrees.length - 1] = 1;
-        int offs = 0; //permet de faire un bond pour les poids de la prochaine neuronne.
-        Arrays.fill(sorties, 0);
-        for (int i = 0; i < sorties.length; i++) {
-            for (int j = 0; j < entrees.length; j++) {
-                sorties[i] += poids[offs + j] * entrees[j];
-            }
-            /**
-             * if (isSigmoid) { output[i] = (float) (1 / (1 +
-             * Math.exp(-output[i]))); }
-            *
-             */
-            offs += entrees.length; //prochaine neuronne
-        }
-        return Arrays.copyOf(sorties, sorties.length);
+        return this.sorties;
     }
     
 }

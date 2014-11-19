@@ -14,57 +14,50 @@ import java.util.Random;
 public class ReseauNeuronnes {
     CoucheNeuronne[] couches;
     
+    public ReseauNeuronnes(int[] nbNoeuds){
+        couches = new CoucheNeuronne[nbNoeuds.length];
+        for(int i = 0; i < nbNoeuds.length; i++){
+            if(i == 0){
+                couches[i] = new CoucheNeuronne(0, nbNoeuds[i], new Random());
+            }else{
+                couches[i] = new CoucheNeuronne(nbNoeuds[i-1], nbNoeuds[i], new Random());
+            }  
+        }
+    }
+    
+    
+    
+    
     public float[] evaluer(float[] entrees){
-        for(int i = 0; i < couches[0].neuronnes.length; ++i){
-            couches[0].neuronnes[i].evaluerEntreeForcee(entrees[i]);
+        for(int i = 0; i < couches.length; i++){
+            if(i == 0){
+                System.out.println("GOT HERE" + entrees[0]);
+                couches[i].evaluerCouche(entrees);
+            }else{
+                couches[i].evaluerCouche(couches[i-1]);
+            }
         }
-        
-        
-        for(int i = 1; i < couches.length; i++){
-            couches[i].evaluerCouche();
-        }
-        afficherCouches();
-        return couches[couches.length-1].getSorties(); 
+        return couches[couches.length -1].getSorties();
     }
     
     private void afficherCouches(){
         for(CoucheNeuronne couche : couches){
             System.out.println("~~~~~Couche~~~~~");
-            for(Neuronne n : couche.neuronnes){
-                System.out.println(n.sortie + " ~~ ");
+            for(Float f : couche.getSorties()){
+                System.out.println(f + " ~~ ");
             }
         }
     }
     
     
     public static void main(String[] args){
-        ReseauNeuronnes r = new ReseauNeuronnes();
-        CoucheNeuronne[] couches = new CoucheNeuronne[2];
-        Neuronne[] nc1 = new Neuronne[2];
-        nc1[0] = new Neuronne();
-        nc1[1] = new Neuronne();
-        Neuronne[] nc2 = new Neuronne[2];
-        nc2[0] = new Neuronne();
-        nc2[1] = new Neuronne();
-        for(Neuronne n : nc2){
-            n.ajouterEntree(nc1[0], new Random().nextFloat());
-            n.ajouterEntree(nc1[1], new Random().nextFloat());
-        }
+        int[] nbNeuronnes = {3,2};
+        ReseauNeuronnes r = new ReseauNeuronnes(nbNeuronnes);
         
-        CoucheNeuronne c1 = new CoucheNeuronne(0, null, new Random());
-        c1.neuronnes = nc1;
+        float[] entrees = {new Random().nextFloat(), new Random().nextFloat(), new Random().nextFloat()};
         
-        CoucheNeuronne c2 = new CoucheNeuronne(2, c1.neuronnes, new Random());
-        c2.neuronnes = nc2;
-        couches[0] = c1;
-        couches[1] = c2;
-        
-        float[] entrees = new float[2];
-        entrees[0] = 0.6f;
-        entrees[1] = 0.8f;
-        
-        r.couches = couches;
         r.evaluer(entrees);
+        r.afficherCouches();
         
     }
 }
